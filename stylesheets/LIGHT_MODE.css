@@ -69,7 +69,18 @@ QTextEdit {
     selection-background-color: #A7C2D1;
     font-size: 18px;
 }
+QTextEdit:enabled {
+    background-color: #FFFFFF; /* Normal background */
+    color: #333333; /* Dark text */
+    border-color: #BBBBBB; /* Lighter border */
+}
 
+/* When the QTextEdit is disabled */
+QTextEdit:disabled {
+    background-color: #F0F0F0; /* Light gray background for disabled */
+    color: #888888; /* Lighter gray text */
+    border-color: #DDDDDD; /* Lighter border */
+}
 /* List Views */
 QListView {
     background-color: #FFFFFF;

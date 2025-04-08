@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QIcon
 class LotusConfig:
-
+    # TODO: change these hardcoded paths to relative paths, based on repo's final location
     _icons = {
         "LOTUS": "/nfs/site/disks/hshow_wa_01/nadavzoh/work/exercises/Lotus/icons/icons8-lotus-16.png",
 

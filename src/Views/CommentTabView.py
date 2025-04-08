@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLabel
 
 
 class CommentTabView(QWidget):
@@ -18,7 +18,7 @@ class CommentTabView(QWidget):
         comment_line_layout.setContentsMargins(0, 0, 0, 0)
         comment_line_layout.addWidget(QLabel("#"))
 
-        self.comment_line_edit = QLineEdit()
+        self.comment_line_edit = QTextEdit()
         self.comment_line_edit.setPlaceholderText("Write comment here")
         comment_line_layout.addWidget(self.comment_line_edit)
 

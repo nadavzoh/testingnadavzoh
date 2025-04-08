@@ -1,4 +1,3 @@
-# DocumentModel.py
 import re
 
 class DocumentModel:
@@ -11,9 +10,9 @@ class DocumentModel:
 
         """ might remove data file because everything is being done through FlyNetlist, for AF atleast..
         check for mutex"""
-        self.data_file_content = []
-        if data_file:
-            self.load_data_file(data_file)
+        # self.data_file_content = []
+        # if data_file:
+        #     self.load_data_file(data_file)
 
         self.current_selected_index = -1  # Track selected line
         # Add history for undo
@@ -32,15 +31,15 @@ class DocumentModel:
             print(f"Error loading regex file: {e}")
             return False
 
-    def load_data_file(self, file_path):
-        """Load data lines to be searched with regex patterns."""
-        try:
-            with open(file_path, 'r') as file:
-                self.data_file_content = [line.strip() for line in file.readlines()]
-            return True
-        except Exception as e:
-            print(f"Error loading data file: {e}")
-            return False
+    # def load_data_file(self, file_path):
+    #     """Load data lines to be searched with regex patterns."""
+    #     try:
+    #         with open(file_path, 'r') as file:
+    #             self.data_file_content = [line.strip() for line in file.readlines()]
+    #         return True
+    #     except Exception as e:
+    #         print(f"Error loading data file: {e}")
+    #         return False
 
     def insert_line(self, line, index):
         """Insert a new line at the specified index or at the end of the file."""
@@ -112,14 +111,14 @@ class DocumentModel:
                 self.current_selected_index = position
                 return True
 
-        elif action_type == 'comment':
-            # For comment, we need to uncomment the line
-            position = data['position']
-            if 0 <= position < len(self.dcfg_file_content):
-                line = self.dcfg_file_content[position]
-                if line.startswith("#"):
-                    self.dcfg_file_content[position] = line[2:]
-                return True
+        # elif action_type == 'comment':
+        #     # For comment, we need to uncomment the line
+        #     position = data['position']
+        #     if 0 <= position < len(self.dcfg_file_content):
+        #         line = self.dcfg_file_content[position]
+        #         if line.startswith("#"):
+        #             self.dcfg_file_content[position] = line[2:]
+        #         return True
 
         elif action_type == 'edit':
             # For edit, we need to restore the old line
@@ -160,14 +159,14 @@ class DocumentModel:
                 self.current_selected_index = max(0, position - 1) if self.dcfg_file_content else -1
                 return True
 
-        elif action_type == 'comment':
-            # For comment, we need to comment the line
-            position = data['position']
-            if 0 <= position < len(self.dcfg_file_content):
-                line = self.dcfg_file_content[position]
-                if not line.startswith("#"):
-                    self.dcfg_file_content[position] = f"# {line}"
-                return True
+        # elif action_type == 'comment':
+        #     # For comment, we need to comment the line
+        #     position = data['position']
+        #     if 0 <= position < len(self.dcfg_file_content):
+        #         line = self.dcfg_file_content[position]
+        #         if not line.startswith("#"):
+        #             self.dcfg_file_content[position] = f"# {line}"
+        #         return True
 
         elif action_type == 'edit':
             # For edit, we need to update the line
@@ -182,7 +181,6 @@ class DocumentModel:
         """Save updated file."""
         if not self.dcfg_file:
             return False
-
         try:
             with open(self.dcfg_file, 'w') as file:
                 file.write("\n".join(self.dcfg_file_content))

@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, pyqtSignal, QStringListModel
 
 
-class AfDialogView(QTabWidget):
+class AfDialogView(QWidget): # change to qwidget?
+    # TODO: REFACTOR THIS ASWELL AS THE BASEDIALOGVIEW, INHERIT FROM IT HERE.
     templateChanged = pyqtSignal(str, bool)  # template, use_regex
     netChanged = pyqtSignal(str, bool)  # pattern, use_regex
     afChanged = pyqtSignal(str)

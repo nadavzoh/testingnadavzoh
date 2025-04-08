@@ -1,19 +1,34 @@
 import re
-from functools import lru_cache
+from functools import lru_cache # caching
+import threading # debouncing
 from fly.fly_netlist import FlyNetlistBuilder
+from src.Managers.LotusFilesManager import LotusFilesManager
 
 class PatternMatcher:
+    """
+        Singleton class to manage pattern matching in Lotus' AF Tab.
+    """
+    # TODO: add debounce to avoid spamming the cache, might not debounce here but the callback when textChanged in search boxes.
+    # TODO: if there is really no use for this class in other tabs then there is no need for it to be a singleton.
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(PatternMatcher, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
     def __init__(self):
-        self._fly_netlist = FlyNetlistBuilder.read_spice_file(
-            'dcchunkrotd', 'some_spice_file.sp')
-        self.find_matches = self._cached_find_matches()
+        if not hasattr(self, '_initialized'):
+            self._initialized = True
+            self._files_manager = LotusFilesManager()
+            self._fly_netlist = FlyNetlistBuilder.read_spice_file(
+                self._files_manager.get_fub(), self._files_manager.get_spice_file())
+            self._debounce_delay = 0.5
+            self._debounce_timer = None
+            self.find_matches = self._cached_find_matches()
 
     def _cached_find_matches(self):
         """
         Creates a cached version of find_matches with a custom cache key
-        that handles the complex input types
         """
-
         @lru_cache(maxsize=128)
         def cached_find_matches(template_name: str, net_name: str,
                                 template_regex: bool, net_regex: bool):

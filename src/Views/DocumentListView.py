@@ -16,15 +16,14 @@ class DocumentListView(QListView):
         self.setModel(self.list_model)
         self.setEditTriggers(QListView.NoEditTriggers)
         self.setSelectionMode(QListView.SingleSelection)
-        self.doubleClicked.connect(lambda idx: self.lineDoubleClicked.emit(idx.row()))
         self.clicked.connect(lambda idx: self.lineSelected.emit(idx.row()))
+        self.doubleClicked.connect(lambda idx: self.lineDoubleClicked.emit(idx.row()))
 
     def update_displayed_input(self, updated_lines):
         """Update the displayed input file list."""
         if updated_lines is None:
             raise ValueError("Updated lines cannot be None.")
-        if updated_lines:
-            self.list_model.setStringList(updated_lines)
+        self.list_model.setStringList(updated_lines)
 
 
     def get_selected_index(self):

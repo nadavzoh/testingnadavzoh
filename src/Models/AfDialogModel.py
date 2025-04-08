@@ -6,7 +6,6 @@ class AfDialogModel:
 
         self.net = ""
         self.net_regex = False
-
         self.template = ""
         self.template_regex = False
 
@@ -21,6 +20,7 @@ class AfDialogModel:
         if not self.net:
             return [], []
         return self.matcher.find_matches(self.template, self.net, self.template_regex, self.net_regex)
+
     def format_line(self):
         # Build flags part
         flags = []
@@ -43,10 +43,12 @@ class AfDialogModel:
         if self.activity_factor:
             line += f" {self.activity_factor}"
 
-        if self.net_regex:
-            line += " net-regexp"
+        # TODO: do this better.. its not well defined,
+        # will probably be an ugly sequence of nested if-else statements
         if self.template_regex:
-            line += "_template-regexp"
+            line += " template-regexp"
+        if self.net_regex:
+            line += "_net-regexp"
         if flags_str:
             line += f"_sch{flags_str}"
 

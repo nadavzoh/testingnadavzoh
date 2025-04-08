@@ -43,22 +43,15 @@ class LotusUIManager(QObject):
 
     def create_main_layout(self, af_dcfg_file, mutex_file):
         """Create the main layout with splitter and panels"""
-        # Main layout
         main_layout = QHBoxLayout()
 
-        # Create splitter
         self.main_splitter = QSplitter(Qt.Horizontal)
-
-        # Create left panel with tabs
-        left_panel = self.create_left_panel(af_dcfg_file)
-
-        # Create right panel stack
+        left_panel = self.create_left_panel(default_tab_file=af_dcfg_file)  # not so pretty, workaround.
         self.right_panel = QStackedWidget()
 
-        # Add panels to splitter
         self.main_splitter.addWidget(left_panel)
         self.main_splitter.addWidget(self.right_panel)
-        self.main_splitter.setSizes([400, 600])  # Initial size distribution
+        self.main_splitter.setSizes([400, 600])
 
         main_layout.addWidget(self.main_splitter)
 
@@ -69,12 +62,12 @@ class LotusUIManager(QObject):
 
         return main_layout
 
-    def create_left_panel(self, file):
+    def create_left_panel(self, default_tab_file):
         """Create the left panel with header, tabs and buttons"""
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
         # header
-        self.header = LotusHeader(os.getcwd(), file)
+        self.header = LotusHeader(default_tab_file)
         left_layout.addWidget(self.header)
         # tabs
         self.tabs = QTabWidget()
@@ -95,6 +88,7 @@ class LotusUIManager(QObject):
         self.insert_line_button.setShortcut(QKeySequence("Ctrl+I"))
         self.buttons_layout.addWidget(self.insert_line_button)
 
+        # TODO: disbale by default, enable when a line is selected
         self.enable_edit_button = QPushButton("Edit")
         self.enable_edit_button.setIcon(LotusConfig.get_icon("ENABLE_EDIT"))
         self.enable_edit_button.setShortcut(QKeySequence("Ctrl+E"))
@@ -137,6 +131,7 @@ class LotusUIManager(QObject):
         self.undo_button.setEnabled(True)
         self.redo_button.setEnabled(True)
         self.save_button.setEnabled(True)
+
     def add_tab(self, widget, title):
         """Add a tab to the tab widget"""
         index = self.tabs.addTab(widget, title)
@@ -160,9 +155,10 @@ class LotusUIManager(QObject):
         self.redo_button.clicked.connect(self.redoRequested.emit)
         self.save_button.clicked.connect(self.saveRequested.emit)
 
-        self.toolbar.exitApplication.connect(self.exitRequested.emit)
-        self.toolbar.save_all_button.clicked.connect(self.saveAllRequested.emit)
-        self.toolbar.toggle_theme_button.clicked.connect(self.toggleThemeRequested.emit)
+        self.toolbar.exitClicked.connect(self._confirm_exit)
+        self.toolbar.saveAll.connect(self.saveAllRequested.emit)
+        self.toolbar.toggleTheme.connect(self.toggleThemeRequested.emit)
+        self.toolbar.showShortcuts.connect(self._show_shortcuts)
 
     def show_info_message(self, title, message):
         """Show an information message box."""
@@ -183,3 +179,49 @@ class LotusUIManager(QObject):
     def set_right_panel_current_index(self, index):
         """Set the current index of the right panel stack"""
         self.right_panel.setCurrentIndex(index)
+
+    def _confirm_exit(self):
+        reply = self.show_question_message(
+            "Exit Application",
+            "Are you sure you want to exit?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.exitRequested.emit()
+
+    def _show_shortcuts(self):
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QDialogButtonBox, QListView
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+        shortcut_list = QListView()
+        shortcut_list_model = QStandardItemModel()
+        shortcut_list.setModel(shortcut_list_model)
+        shortcuts = [
+            ("Exit", "Ctrl+Q"),
+            ("Save All", "Ctrl+Shift+S"),
+            ("Toggle Dark/Light Mode", "Ctrl+T"),
+            ("Shortcuts Help", "Ctrl+H"),
+            ("Save File", "Ctrl+S"),
+            ("Insert New Line", "Ctrl+I"),
+            ("Edit Line", "Ctrl+E"),
+            ("Delete Line", "Delete"),
+            ("Undo", "Ctrl+Z"),
+            ("Redo", "Ctrl+Shift+Z"),
+        ]
+        for action, shortcut in shortcuts:
+            item = QStandardItem(f"{action}: {shortcut}")
+            item.setEditable(False)
+            shortcut_list_model.appendRow(item)
+
+        dialog = QDialog()
+        dialog.setWindowTitle("Shortcuts Help")
+        dialog.setWindowIcon(LotusConfig.get_icon("LOTUS"))
+        dialog.setMinimumWidth(400)
+        dialog.setGeometry(300, 200, 400, 400)
+
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(shortcut_list)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box.accepted.connect(dialog.accept)
+        layout.addWidget(button_box)
+
+        dialog.exec_()

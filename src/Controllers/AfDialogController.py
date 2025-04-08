@@ -84,7 +84,11 @@ class AfDialogController(QObject):
             return
         # else - AF tab
         self.change_tab("AF")
-        fields = self.model.get_fields_from_line(line)
+        try:
+            fields = self.model.get_fields_from_line(line)
+        except ValueError as e:
+            self.view.main_tab.show_error("Invalid line format", str(e))
+            return
         self.view.main_tab.template_edit.setText(fields.get("template", ""))
         self.view.main_tab.template_enable_regex.setChecked(fields.get("template_regex", False))
         self.view.main_tab.net_edit.setText(fields.get("net", ""))
@@ -101,8 +105,9 @@ class AfDialogController(QObject):
                     self.dialog_accepted.emit(self.view.main_tab.line_preview.text())
             except ValueError as e:
                 self.view.main_tab.show_error("Validation Error", str(e))
+                return
         elif self.get_active_tab() == 1:
-            self.dialog_accepted.emit(f"# {self.view.comment_tab.comment_line_edit.text()}")
+            self.dialog_accepted.emit(f"# {self.view.comment_tab.comment_line_edit.toPlainText()}")
         self.dialog_cancelled.emit()
         self.toggle_tab_editable(False)
 
@@ -147,6 +152,7 @@ class AfDialogController(QObject):
         self.view.main_tab.line_preview.setText(line)
 
     def _on_clear_dialog_requested(self):
+        # TODO: clear search fields
         if self.view.tabs.currentIndex() == 0:
             self.view.main_tab.net_edit.clear()
             self.view.main_tab.net_enable_regex.setChecked(False)
