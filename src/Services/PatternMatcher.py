@@ -19,8 +19,12 @@ class PatternMatcher:
         if not hasattr(self, '_initialized'):
             self._initialized = True
             self._files_manager = LotusFilesManager()
-            self._fly_netlist = FlyNetlistBuilder.read_spice_file(
-                self._files_manager.get_fub(), self._files_manager.get_spice_file())
+            try:
+                self._fly_netlist = FlyNetlistBuilder.read_spice_file(
+                    self._files_manager.get_fub(), self._files_manager.get_spice_file())
+            except FileNotFoundError:
+                print(f"-F-    Spice file not found: {self._files_manager.get_spice_file()}")
+                exit(1)
             self._debounce_delay = 0.5
             self._debounce_timer = None
             self.find_matches = self._cached_find_matches()
@@ -32,7 +36,6 @@ class PatternMatcher:
         @lru_cache(maxsize=128)
         def cached_find_matches(template_name: str, net_name: str,
                                 template_regex: bool, net_regex: bool):
-            print("Cache miss")
             if not template_name and not net_name:
                 return (), ()
             top_cell = self._fly_netlist.get_top_cell().get_name()

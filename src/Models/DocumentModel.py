@@ -31,22 +31,13 @@ class DocumentModel:
             print(f"Error loading regex file: {e}")
             return False
 
-    # def load_data_file(self, file_path):
-    #     """Load data lines to be searched with regex patterns."""
-    #     try:
-    #         with open(file_path, 'r') as file:
-    #             self.data_file_content = [line.strip() for line in file.readlines()]
-    #         return True
-    #     except Exception as e:
-    #         print(f"Error loading data file: {e}")
-    #         return False
 
     def insert_line(self, line, index):
         """Insert a new line at the specified index or at the end of the file."""
         if index == -1:
             index = len(self.dcfg_file_content)
-        # else:
         self.dcfg_file_content.insert(index, line)  # Insert after current line
+        self.current_selected_index = index
         # Record action for undo
         self._record_action('insert', {'position': index, 'line': line})
         return True

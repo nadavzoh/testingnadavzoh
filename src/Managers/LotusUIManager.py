@@ -1,12 +1,11 @@
 # Improved LotusUIManager.py
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QTabWidget, QWidget,
-                             QMessageBox, QPushButton, QSplitter, QStackedWidget, QMainWindow)
+                             QMessageBox, QPushButton, QSplitter, QStackedWidget)
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from src.Views.LotusToolbar import LotusToolbar
-from src.Views.LotusHeader import LotusHeader
+from src.Widgets.LotusToolbar import LotusToolbar
+from src.Widgets.LotusHeader import LotusHeader
 from src.Services.LotusConfig import LotusConfig
-import os
 
 
 class LotusUIManager(QObject):
@@ -41,12 +40,12 @@ class LotusUIManager(QObject):
         self.parent.setGeometry(*geometry)
         self.parent.addToolBar(self.toolbar)
 
-    def create_main_layout(self, af_dcfg_file, mutex_file):
+    def create_main_layout(self):
         """Create the main layout with splitter and panels"""
         main_layout = QHBoxLayout()
 
         self.main_splitter = QSplitter(Qt.Horizontal)
-        left_panel = self.create_left_panel(default_tab_file=af_dcfg_file)  # not so pretty, workaround.
+        left_panel = self.create_left_panel()  # not so pretty, workaround.
         self.right_panel = QStackedWidget()
 
         self.main_splitter.addWidget(left_panel)
@@ -62,12 +61,12 @@ class LotusUIManager(QObject):
 
         return main_layout
 
-    def create_left_panel(self, default_tab_file):
+    def create_left_panel(self):
         """Create the left panel with header, tabs and buttons"""
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
         # header
-        self.header = LotusHeader(default_tab_file)
+        self.header = LotusHeader()
         left_layout.addWidget(self.header)
         # tabs
         self.tabs = QTabWidget()
@@ -79,60 +78,57 @@ class LotusUIManager(QObject):
 
         return left_panel
 
+    def _create_button(self, text, icon, shortcut, enabled=True):
+        """Create a button with specified text, icon and shortcut."""
+        button = QPushButton(text)
+        button.setIcon(LotusConfig.get_icon(icon))
+        button.setShortcut(QKeySequence(shortcut))
+        button.setEnabled(enabled)
+        return button
+
     def _create_buttons_layout(self):
         """Create a layout with buttons for the left panel."""
         self.buttons_layout = QHBoxLayout()
 
-        self.insert_line_button = QPushButton("Insert")
-        self.insert_line_button.setIcon(LotusConfig.get_icon("INSERT_LINE"))
-        self.insert_line_button.setShortcut(QKeySequence("Ctrl+I"))
+        self.insert_line_button = self._create_button("Insert", "INSERT_LINE", "Ctrl+I")
         self.buttons_layout.addWidget(self.insert_line_button)
 
-        # TODO: disbale by default, enable when a line is selected
-        self.enable_edit_button = QPushButton("Edit")
-        self.enable_edit_button.setIcon(LotusConfig.get_icon("ENABLE_EDIT"))
-        self.enable_edit_button.setShortcut(QKeySequence("Ctrl+E"))
+        self.enable_edit_button = self._create_button("Edit", "ENABLE_EDIT", "Ctrl+E")
         self.buttons_layout.addWidget(self.enable_edit_button)
 
-        self.delete_line_button = QPushButton("Delete")
-        self.delete_line_button.setIcon(LotusConfig.get_icon("ERASE"))
-        self.delete_line_button.setShortcut(QKeySequence.Delete)
+        self.delete_line_button = self._create_button("Delete", "ERASE", "Delete")
         self.buttons_layout.addWidget(self.delete_line_button)
 
-        self.undo_button = QPushButton("Undo")
-        self.undo_button.setIcon(LotusConfig.get_icon("UNDO"))
-        self.undo_button.setShortcut(QKeySequence.Undo)
+        self.undo_button = self._create_button("Undo", "UNDO", "Ctrl+Z")
         self.buttons_layout.addWidget(self.undo_button)
 
-        self.redo_button = QPushButton("Redo")
-        self.redo_button.setIcon(LotusConfig.get_icon("REDO"))
-        self.redo_button.setShortcut(QKeySequence.Redo)
+        self.redo_button = self._create_button("Redo", "REDO", "Ctrl+Shift+Z")
         self.buttons_layout.addWidget(self.redo_button)
 
-        self.save_button = QPushButton("Save")
-        self.save_button.setIcon(LotusConfig.get_icon("SAVE"))
-        self.save_button.setShortcut(QKeySequence.Save)
+        self.save_button = self._create_button("Save", "SAVE", "Ctrl+S")
         self.buttons_layout.addWidget(self.save_button)
 
         return self.buttons_layout
 
     def disable_buttons(self):
         self.insert_line_button.setEnabled(False)
-        self.enable_edit_button.setEnabled(False)
+        self.enable_edit_button.setEnabled(False) # ?
         self.delete_line_button.setEnabled(False)
         self.undo_button.setEnabled(False)
         self.redo_button.setEnabled(False)
         self.save_button.setEnabled(False)
+        self.tabs.setEnabled(False)
 
     def enable_buttons(self):
         self.insert_line_button.setEnabled(True)
-        self.enable_edit_button.setEnabled(True)
+        self.enable_edit_button.setEnabled(True) # ?
         self.delete_line_button.setEnabled(True)
         self.undo_button.setEnabled(True)
         self.redo_button.setEnabled(True)
         self.save_button.setEnabled(True)
+        self.tabs.setEnabled(True)
 
-    def add_tab(self, widget, title):
+    def add_tab_to_left_panel(self, widget, title):
         """Add a tab to the tab widget"""
         index = self.tabs.addTab(widget, title)
         return index
@@ -206,6 +202,7 @@ class LotusUIManager(QObject):
             ("Delete Line", "Delete"),
             ("Undo", "Ctrl+Z"),
             ("Redo", "Ctrl+Shift+Z"),
+            ("Unselect Line", "Esc")
         ]
         for action, shortcut in shortcuts:
             item = QStandardItem(f"{action}: {shortcut}")

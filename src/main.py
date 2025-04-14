@@ -13,7 +13,7 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = parse_args()  # use argparse and pass to Lotus ctor, or sys.argv through os.environ ?
     app = QApplication(sys.argv)
     main_window = Lotus()
     main_window.show()

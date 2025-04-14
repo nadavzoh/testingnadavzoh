@@ -1,76 +1,114 @@
+from PyQt5.QtCore import QObject, pyqtSignal
+from src.Factories.TabFactory import TabFactory
 
-# think about how it interacts with the LotusUIManager.
 
-class LotusTabManager:
+class LotusTabManager(QObject):
     """
-    This class manages the tabs in the Lotus application.
-    It handles adding and removing tabs, as well as managing their content.
-    Also - it will handle the tab order, visibility and signal connections between the
-    currently active left panel tab and the right panel.
+    Manager class to handle tab operations and coordination between different tabs.
+    It uses TabFactory to create tabs and manages their lifecycle.
     """
+    tabChanged = pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, ui_manager, files_manager):
         """
-        Initializes the LotusTabManager.
-        """
-        pass
+        Initialize the tab manager with UI manager and files manager.
 
-    def add_tab(self, tab_name):
+        Args:
+            ui_manager: The UI manager to handle UI updates
+            files_manager: The files manager to get file paths
         """
-        Adds a new tab to the application.
+        super().__init__()
+        self.ui_manager = ui_manager
+        self.files_manager = files_manager
 
-        :param tab_name: The name of the tab to add.
-        """
-        pass
+        # Container for all tabs
+        self.tabs = []
+        self.active_tab_index = 0
 
-    def remove_tab(self, tab_name):
-        """
-        Removes a tab from the application.
+        # Connect signals
+        self.ui_manager.tabChanged.connect(self.on_tab_changed)
 
-        :param tab_name: The name of the tab to remove.
-        """
-        pass
+    def initialize_tabs(self):
+        """Initialize default tabs based on files from the files manager"""
+        self.add_tab("af",
+                     self.files_manager.get_af_dcfg_file(),
+                     self.files_manager.get_spice_file())
 
-    def set_tab_order(self, tab_order):
-        """
-        Sets the order of the tabs in the application.
+        # TODO: ENABLE MUTEX TAB
+        # self.add_tab("mutex",
+        #              self.files_manager.get_mutex_dcfg_file(),
+        #              self.files_manager.get_spice_file())
 
-        :param tab_order: A list of tab names in the desired order.
-        """
-        pass
+        # Set first tab as active if tabs exist
+        if self.tabs:
+            self.set_active_tab(0)
+            self.ui_manager.update_header_filepath(self.tabs[0]['config_file'])
 
-    def set_tab_visibility(self, tab_name, visible):
+    def add_tab(self, tab_type, config_file, spice_file):
         """
-        Sets the visibility of a tab in the application.
+        Add a new tab of the specified type.
 
-        :param tab_name: The name of the tab to set visibility for.
-        :param visible: True to show the tab, False to hide it.
-        """
-        pass
+        Args:
+            tab_type (str): Type of tab to add (e.g., "af", "mutex")
+            config_file (str): Path to the configuration file
+            spice_file (str): Path to the spice file
 
-    def connect_signals(self, signal, slot):
+        Returns:
+            int: Index of the newly added tab
         """
-        Connects a signal to a slot for the currently active tab.
+        # Create tab components using factory
+        tab = TabFactory.create_tab(tab_type, config_file, spice_file)
 
-        :param signal: The signal to connect.
-        :param slot: The slot to connect the signal to.
-        """
-        pass
+        # Add views to UI
+        doc_view = tab['document']['view']
+        dialog_view = tab['dialog']['view']
+        title = tab['title']
 
-    def disconnect_signals(self, signal, slot):
-        """
-        Disconnects a signal from a slot for the currently active tab.
+        # Add to UI manager and get indexes
+        doc_tab_index = self.ui_manager.add_tab_to_left_panel(doc_view, title)
+        dialog_panel_index = self.ui_manager.add_right_panel_content(dialog_view)
 
-        :param signal: The signal to disconnect.
-        :param slot: The slot to disconnect the signal from.
-        """
-        pass
+        # Store tab data with UI indexes
+        tab['doc_tab_index'] = doc_tab_index
+        tab['dialog_panel_index'] = dialog_panel_index
+        tab['config_file'] = config_file
 
-    def update_tab_content(self, tab_name, content):
-        """
-        Updates the content of a tab in the application.
+        # Add tab to managed list
+        self.tabs.append(tab)
 
-        :param tab_name: The name of the tab to update.
-        :param content: The new content for the tab.
-        """
-        pass
+        # Connect signals from dialog controller
+        dialog_controller = tab['dialog']['controller']
+        dialog_controller.dialog_accepted.connect(self.ui_manager.enable_buttons)
+        dialog_controller.dialog_cancelled.connect(self.ui_manager.enable_buttons)
+
+        # Return the tab index
+        return len(self.tabs) - 1
+
+    def on_tab_changed(self, index):
+        """Handle tab changed event from UI"""
+        if 0 <= index < len(self.tabs):
+            self.active_tab_index = index
+            self.set_active_tab(index)
+
+    def set_active_tab(self, index):
+        """Set the active tab by index"""
+        if 0 <= index < len(self.tabs):
+            self.active_tab_index = index
+            tab = self.tabs[index]
+
+            # Update UI to show the right dialog panel
+            self.ui_manager.set_right_panel_current_index(tab['dialog_panel_index'])
+
+            # Update filepath in header
+            if 'config_file' in tab:
+                self.ui_manager.update_header_filepath(tab['config_file'])
+
+    def get_active_controller(self):
+        """Get the document controller for the active tab"""
+        if 0 <= self.active_tab_index < len(self.tabs):
+            return self.tabs[self.active_tab_index]['document']['controller']
+        return None
+
+    def get_controllers(self):
+        """Get all document controllers"""
+        return [tab['document']['controller'] for tab in self.tabs]

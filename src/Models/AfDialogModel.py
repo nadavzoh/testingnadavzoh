@@ -1,6 +1,8 @@
 from src.Services.PatternMatcher import PatternMatcher
+from src.Models.AbstractDialogModel import AbstractDialogModel
 import re
-class AfDialogModel:
+
+class AfDialogModel(AbstractDialogModel):
     def __init__(self):
         self.matcher = PatternMatcher()
 
@@ -22,64 +24,86 @@ class AfDialogModel:
         return self.matcher.find_matches(self.template, self.net, self.template_regex, self.net_regex)
 
     def format_line(self):
+        """Format the model data as a line to be inserted/edited in the config file."""
         # Build flags part
-        flags = []
-        if self.em_enabled:
-            flags.append("_em")
-        if self.sh_enabled:
-            flags.append("_sh")
 
-        flags_str = " ".join(flags)
+        # flags_str = " ".join(flags)
 
         # Format the line to be inserted
         if self.template:
             if self.net:
-                line = f"{{{self.template}:{self.net}}}"
+                pattern = f"{{{self.template}:{self.net}}}"
             else:
-                line = f"{{{self.template}}}"
+                pattern = f"{{{self.template}}}"
         else:
-            line = f"{{{self.net}}}"
+            pattern = f"{{{self.net}}}"
+
+        parts = [pattern]
 
         if self.activity_factor:
-            line += f" {self.activity_factor}"
+            parts.append(self.activity_factor)
 
-        # TODO: do this better.. its not well defined,
-        # will probably be an ugly sequence of nested if-else statements
-        if self.template_regex:
-            line += " template-regexp"
-        if self.net_regex:
-            line += "_net-regexp"
-        if flags_str:
-            line += f"_sch{flags_str}"
+        flags = []
+        # Construct flags part
+        if self.template:
+            if self.template_regex:
+                flags.append("template-regexp")
+            else:
+                flags.append("template-regular")
+        if self.net:
+            if self.net_regex:
+                flags.append("net-regexp")
+            else:
+                flags.append("net-regular")
 
+        if self.em_enabled or self.sh_enabled:
+            flags.append("sch")
+        if self.em_enabled:
+            flags.append("em")
+        if self.sh_enabled:
+            flags.append("sh")
+
+        # Join all parts
+        pattern_and_af_str = " ".join(parts)
+        flags_str = "_".join(flags)
+
+        line = pattern_and_af_str + " " + flags_str
         return line
 
     def get_fields_from_line(self, line):
-        if line == "":
+        """Parse a config line into fields the model can understand."""
+        if not line:
             return {}
+
         out = {}
         fields = line.split()
-        if len(fields) < 3:
+        if len(fields) < 2:
             raise ValueError("Invalid line format")
+
+        # Parse the pattern (template and net)
         try:
             out['template'], out['net'] = fields[0].strip("{}").split(":")
         except ValueError:
             out['net'] = fields[0].strip("{}")
+
+        # Parse the activity factor
         out['af'] = fields[1]
-        flags = fields[2]
-        if "net-regex" in flags:
-            out['net_regex'] = True
-        if "template-regex" in flags:
-            out['template_regex'] = True
-        # et - regexp_template - regexp_sch_sh
-        if "_em" in flags:
+
+        # Parse the flags
+        if len(fields) > 2:
+            flags = fields[2].split("_")
+            out['template_regex'] = "template-regexp" in flags
+            out['net_regex'] = "net-regexp" in flags
+            out['em'] = "em" in flags
+            out['sh'] = "sh" in flags
+        else:
+            # default to both True in case of no flags
             out['em'] = True
-        if "_sh" in flags:
             out['sh'] = True
-        # logic to parse checkboxes values from the flags
         return out
 
     def validate_input(self):
+        """Validate the current input data."""
         # Validate net
         if not self.net:
             raise ValueError("Pattern is required")

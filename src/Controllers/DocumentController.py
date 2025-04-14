@@ -4,9 +4,10 @@ class DocumentController:
         self.view = view
         self.dialog_controller = None
 
-        self.view.update_displayed_input(self.model.dcfg_file_content)
+        self.view.update_content(self.model.dcfg_file_content)
         self.view.lineSelected.connect(self.on_line_selected)
         self.view.lineDoubleClicked.connect(self.on_line_double_clicked)
+        self.view.cancelSelection.connect(self._on_line_selection_cancelled)
 
     def set_dialog_controller(self, dialog_controller):
         self.dialog_controller = dialog_controller
@@ -26,12 +27,17 @@ class DocumentController:
             line = self.model.dcfg_file_content[index]
             self.dialog_controller.fill_dialog_with_line(line)
 
+    def _on_line_selection_cancelled(self):
+        self.dialog_controller._on_clear_dialog_requested()
+
     def insert_line(self, line):
         """Insert a new line at the currently selected line."""
         index = self.view.get_selected_index()
         success = self.model.insert_line(line, index)
         if success:
-            self.view.update_displayed_input(self.model.dcfg_file_content)
+            self.view.update_content(self.model.dcfg_file_content)
+            if index == -1:
+                index = len(self.model.dcfg_file_content) - 1
             self.view.select_line(index)
             self.on_line_selected(index)
         return success
@@ -40,7 +46,7 @@ class DocumentController:
         """Edit the currently selected line."""
         success = self.model.edit_current_line(line)
         if success:
-            self.view.update_displayed_input(self.model.dcfg_file_content)
+            self.view.update_content(self.model.dcfg_file_content)
             self.view.select_line(self.model.current_selected_index)
             self.on_line_selected(self.model.current_selected_index)
             self.dialog_controller.set_edit_mode(False)
@@ -49,7 +55,6 @@ class DocumentController:
     def enter_edit_mode(self):
         """Sends a signal to the dialog controller to enable the save button."""
         self.dialog_controller.set_edit_mode(True)
-        self.dialog_controller.toggle_tab_editable(True)
         self.view.setEnabled(False)
 
     def _on_cancel_dialog(self):
@@ -62,7 +67,7 @@ class DocumentController:
         index = self.view.get_selected_index()
         success = self.model.delete_line(index)
         if success:
-            self.view.update_displayed_input(self.model.dcfg_file_content)
+            self.view.update_content(self.model.dcfg_file_content)
             # Select the line at the same position (or last line if deleted last)
             new_index = min(index, len(self.model.dcfg_file_content) - 1)
             if new_index >= 0:
@@ -74,7 +79,7 @@ class DocumentController:
         """Undo the last action."""
         success = self.model.undo_last_action()
         if success:
-            self.view.update_displayed_input(self.model.dcfg_file_content)
+            self.view.update_content(self.model.dcfg_file_content)
             # Select the appropriate line after undo
             if self.model.current_selected_index >= 0:
                 self.view.select_line(self.model.current_selected_index)
@@ -85,7 +90,7 @@ class DocumentController:
         """Redo the last undone action."""
         success = self.model.redo_action()
         if success:
-            self.view.update_displayed_input(self.model.dcfg_file_content)
+            self.view.update_content(self.model.dcfg_file_content)
             # Select the appropriate line after redo
             if self.model.current_selected_index >= 0:
                 self.view.select_line(self.model.current_selected_index)

@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QPushButton, QToolBar
 
 from src.Services.LotusConfig import LotusConfig
 
-
 class LotusToolbar(QToolBar):
     exitClicked = pyqtSignal()
     saveAll = pyqtSignal()
@@ -12,7 +11,6 @@ class LotusToolbar(QToolBar):
     showShortcuts = pyqtSignal()
     def __init__(self):
         super().__init__()
-
         self.exit_button = QPushButton("Exit", self)
         self.exit_button.setIcon(LotusConfig.get_icon("CANCEL"))
         self.exit_button.setShortcut(QKeySequence.Quit)

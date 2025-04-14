@@ -14,8 +14,9 @@ class LotusFilesManager:
         if not hasattr(self, '_initialized'):
             self._root_dir = os.environ['LOTUS_ROOT_DIR']
             self._fub = os.environ['LOTUS_FUB']
-            self._spice_file = os.environ.get('LOTUS_SPICE_FILE') or f'{self._root_dir}/drive/cfg/{self._fub}.sp'
+            self._spice_file = os.environ.get('LOTUS_SPICE_FILE') or f'{self._root_dir}/netlists/spice/{self._fub}.sp'
             self._spice_data = self.load_spice_data()  # TODO: in case future tabs need it, might not be needed if mutex tab also utilizes fly
+            # if a config file is not found, an empty editor will be created in the specified tab
             self._af_dcfg_file = os.environ.get('LOTUS_AF_DCFG_FILE') or f'{self._root_dir}/drive/cfg/{self._fub}.af.dcfg'
             self._mutex_dcfg_file = os.environ.get('LOTUS_MUTEX_DCFG_FILE') or f'{self._root_dir}/drive/cfg/{self._fub}.mutex.dcfg'
             self._initialized = True
@@ -36,6 +37,10 @@ class LotusFilesManager:
         return self._mutex_dcfg_file
 
     def load_spice_data(self):
-        with open(self._spice_file, 'r') as f:
-            self._spice_data = f.read()
+        try:
+            with open(self._spice_file, 'r') as f:
+                self._spice_data = f.read()
+        except FileNotFoundError:
+            print(f"-F-    Spice file not found: {self._spice_file}")
+            exit(1)
         return self._spice_data

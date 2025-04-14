@@ -20,7 +20,7 @@ os.environ['LOTUS_ROOT_DIR'] = os.environ['WORK_AREA_ROOT_DIR']
 # FUB NAME
 if '-fub' not in sys.argv and '--fub' not in sys.argv:
     print(sys.argv)
-    print("FUB name not provided, Lotus will now exit.")
+    print("FUB name not provided, please provide one with -fub <fub_name>.")
     sys.exit(1)
 os.environ['LOTUS_FUB'] = sys.argv[sys.argv.index('-fub') + 1]
 ############################ MANDATORY COMMANDLINE ARGUMENT ############################

@@ -1,37 +1,41 @@
-class MutexDialogController:
-    """Controller class to handle user interactions."""
+from PyQt5.QtCore import pyqtSignal
+from src.Controllers.AbstractDialogController import AbstractDialogController
+
+
+class MutexDialogController(AbstractDialogController):
+    """Controller class for mutex dialog interactions."""
 
     def __init__(self, model, view):
         """Initialize with model and view instances."""
-        self.model = model
-        self.view = view.main_tab
-
-        # Connect button signals to slots
-        self.view.move_right_button.clicked.connect(self.move_item_to_right)
-        self.view.move_left_button.clicked.connect(self.move_item_to_left)
-
+        super().__init__(model, view)
         # Initial update of view
         self.update_view()
 
-    def move_item_to_right(self):
-        """Handle moving selected item from left to right."""
-        # Get the selected index from the left list view
-        indexes = self.view.left_list_view.selectedIndexes()
-        if indexes:
-            # Only use the first selected item
-            index = indexes[0].row()
-            if self.model.move_to_right(index):
-                self.update_view()
+    def _connect_signals(self):
+        """Connect signals from the view to slots in this controller."""
+        # Connect main tab button signals
+        self.view.itemMovedToRight.connect(self.move_item_to_right)
+        self.view.itemMovedToLeft.connect(self.move_item_to_left)
 
-    def move_item_to_left(self):
+        # Connect common buttons
+        self.view.reset_button.clicked.connect(self._on_clear_dialog_requested)
+        self.view.cancel_button.clicked.connect(self._on_cancel_dialog)
+        self.view.save_line_button.clicked.connect(self._on_save_line_requested)
+
+    def toggle_tab_editable(self, editable):
+        """Enable or disable editing of the current tab."""
+        # Use the view's built-in method to handle this
+        self.view.set_editable(editable)
+
+    def move_item_to_right(self, index):
+        """Handle moving selected item from left to right."""
+        if self.model.move_to_right(index):
+            self.update_view()
+
+    def move_item_to_left(self, index):
         """Handle moving selected item from right to left."""
-        # Get the selected index from the right list view
-        indexes = self.view.right_list_view.selectedIndexes()
-        if indexes:
-            # Only use the first selected item
-            index = indexes[0].row()
-            if self.model.move_to_left(index):
-                self.update_view()
+        if self.model.move_to_left(index):
+            self.update_view()
 
     def update_view(self):
         """Update the view with current model data."""
@@ -39,3 +43,52 @@ class MutexDialogController:
             self.model.get_left_items(),
             self.model.get_right_items()
         )
+
+    def fill_dialog_with_line(self, line):
+        """Fill the dialog with data parsed from a line."""
+        if line.startswith('#'):
+            # It's a comment line - directly pass to view
+            self.view.fill_from_data(line)
+        else:
+            # Handle mutex config line parsing
+            # This would need to be implemented based on mutex file format
+            # For now, we'll just show the comment tab
+            self.view.tabs.setCurrentIndex(0)  # Switch to Mutex tab
+            # Parse and update the mutex lists - to be implemented
+
+    def _on_cancel_dialog(self):
+        """Handle dialog cancellation."""
+        self.dialog_cancelled.emit()
+        self.toggle_tab_editable(False)
+
+    def _on_save_line_requested(self):
+        """Handle save button click."""
+        if self.view.tabs.currentIndex() == 0:  # Mutex tab
+            # Generate mutex config line based on selected items
+            # For now, just emit a placeholder
+            # This would be implemented based on your mutex format
+            left_items = self.model.get_left_items()
+            right_items = self.model.get_right_items()
+
+            if right_items:
+                # Example format - adjust to your actual format
+                mutex_line = "MUTEX " + " ".join(right_items)
+                self.dialog_accepted.emit(mutex_line)
+            else:
+                self.view.show_error("Validation Error", "You must select at least one item for the mutex rule")
+                return
+
+        elif self.view.tabs.currentIndex() == 1:  # Comment tab
+            self.dialog_accepted.emit(f"# {self.view.comment_edit.toPlainText()}")
+
+        self.dialog_cancelled.emit()
+        self.toggle_tab_editable(False)
+
+    def _on_clear_dialog_requested(self):
+        """Handle reset button click."""
+        self.view.clear_form()
+
+    def set_edit_mode(self, is_edit):
+        """Set whether the dialog is in edit mode."""
+        self.edit_mode = is_edit
+        self.toggle_tab_editable(is_edit)
