@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Determine the location of this script and the Lotus root directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOTUS_ROOT_DIR="$(dirname "${SCRIPT_DIR}")"
+LOTEM_ROOT_DIR="$(dirname "${LOTUS_ROOT_DIR}")"
+LOTEM_SRC_DIR="${LOTUS_ROOT_DIR}/src"
+FLY_ROOT_DIR="${LOTEM_ROOT_DIR}/fly"
+
+# Set up environment variables
+export LOTUS_ROOT_DIR="${LOTUS_ROOT_DIR}"
+
+export PYTHONPATH="${LOTUS_ROOT_DIR}"\
+:"${LOTEM_SRC_DIR}"\
+:"${FLY_ROOT_DIR}"\
+:"${LOTEM_ROOT_DIR}/src/external_modules"\
+:"${PYTHONPATH}"
+
+
+# Set up library path for PyQt5
+export LD_LIBRARY_PATH="/usr/intel/pkgs/gcc/14.2.0/lib/:${LD_LIBRARY_PATH}"
+
+# Set up QT environment variables to avoid warnings
+export XDG_RUNTIME_DIR="/tmp/runtime-${USER}"
+export QT_XCB_NO_XI2="1"
+export QT_XCB_NO_XRANDR="1"
+export QT_XCB_GL_INTEGRATION="none"
+export QT_QPA_PLATFORM="xcb"
+
+# Python interpreter
+PYTHON="/usr/intel/pkgs/python3/3.11.1/bin/python3"
+
+# Forward all arguments to the main.py script
+exec "${PYTHON}" -m src.main "$@"

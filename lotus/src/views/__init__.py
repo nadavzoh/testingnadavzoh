@@ -1,0 +1,1 @@
+# Lotus views package

@@ -1,0 +1,128 @@
+# Owner : Elyada Bar Chaim
+# SH is calculated over 30ns (~129 cycles at 4.3GHz)
+# Look like bursts of read can happen (AF=0.5)
+# Bursts of write - need to check with MLC.
+{.*:.*} 1 template-regexp_net-regexp
+##### Decoder #####
+{issax2dec1:wlnn$}              0.02    net-regexp_template-regular_sch_sh
+{issax2dec1:wl$}                0.02    net-regexp_template-regular_sch_sh
+{issax2dec1:wllvl}              0.01    net-regexp_template-regular_sch_sh
+{issax2dec4:ab$}                0.10    net-regexp_template-regular_sch_sh
+{issax2dec1:slpen$}             0.20    net-regexp_template-regular_sch_sh
+{issax2dec32:wle[n]*\[\d\]$}    0.17    net-regexp_template-regular_sch_sh
+{issax2dec32:wllvl\[\d\]$}      0.01    net-regexp_template-regular_sch_sh
+{issaxdecpre:xpredec.*$}        0.15    net-regexp_template-regular_sch_sh
+
+{issax2dec1:wlnn$}              0.01    net-regexp_template-regular_sch_em
+{issax2dec1:wl$}                0.01    net-regexp_template-regular_sch_em
+{issax2dec1:wllvl}              0.01    net-regexp_template-regular_sch_em
+{issax2dec4:ab$}                0.10    net-regexp_template-regular_sch_em
+{issax2dec1:slpen$}             0.10    net-regexp_template-regular_sch_em
+{issax2dec1:decvcc$}            0.10    net-regexp_template-regular_sch_em
+{issax2dec32:wle[n]*\[\d\]$}    0.10    net-regexp_template-regular_sch_em
+{issax2dec32:wllvl\[\d\]$}      0.01    net-regexp_template-regular_sch_em
+{issaxdecpre:xpredec.*$}        0.10    net-regexp_template-regular_sch_em
+
+##### Read - slice ######
+# bl - full swing only for write...
+{issahcciordyselx(4|2):bl[n]*\[\d\]$}           0.15    net-regexp_template-regexp_sch_sh
+{issahcciordyselx(4|2):inbl[n]*$}               0.20    net-regexp_template-regexp_sch_sh
+{issahcciordyselx(4|2):rdcolsel(nn)?\[\d\]$}    0.12    net-regexp_template-regexp_sch_sh
+{issahccsiocmr2cmw8:rdcolsel(nn)?\[\d\]$}       0.12    net-regexp_template-regexp_sch_sh
+{issahccioblpch4:pc[n]*$}                       0.50    net-regexp_template-regexp_sch_sh
+{issahcciosenseampintnbl:sae[n]*$}              0.35    net-regexp_template-regexp_sch_sh
+{issahcciosenseampintnbl:sapch[n]*$}            0.35    net-regexp_template-regexp_sch_sh
+{issahccciocmr2cmw8:sapch[n]*$}                 0.35    net-regexp_template-regexp_sch_sh
+{issahcciosenseampintnbl:sapch[n]*_int$}        0.35    net-regexp_template-regexp_sch_sh
+{issahcciosenseampintnbl:clksalatnn}            0.40    net-regexp_template-regexp_sch_sh
+
+{issahcciordyselx(4|2):bl[n]*\[\d\]$}           0.10    net-regexp_template-regexp_sch_em
+{issahcciordyselx(4|2):inbl[n]*$}               0.10    net-regexp_template-regexp_sch_em
+{issahcciordyselx(4|2):rdcolsel(nn)?\[\d\]$}    0.12    net-regexp_template-regexp_sch_em
+{issahccsiocmr2cmw8:rdcolsel(nn)?\[\d\]$}       0.12    net-regexp_template-regexp_sch_em
+{issahccioblpch4:pc[n]*$}                       0.30    net-regexp_template-regexp_sch_em
+{issahcciosenseampintnbl:sae[n]*$}              0.20    net-regexp_template-regexp_sch_em
+{issahcciosenseampintnbl:sapch[n]*_int$}        0.20    net-regexp_template-regexp_sch_em
+{issahcciosenseampintnbl:clksalatnn}            0.20    net-regexp_template-regexp_sch_em
+{issahcciosenseampintnbl:dosa[n]*$}             0.20    net-regexp_template-regexp_sch_em
+{issahcciosenseampintnbl:sapch[n]*$}            0.20    net-regexp_template-regexp_sch_em
+
+##### Write - slice #####
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrcolsel\[\d\]$}           0.15  net-regexp_template-regexp_sch_sh
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrcolselnn\[\d\]$}         0.15  net-regexp_template-regexp_sch_sh
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrdata[n]*$}               0.15  net-regexp_template-regexp_sch_sh
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrbl[n]*\[\d\]$}           0.15  net-regexp_template-regexp_sch_sh
+#{issahcciosbcell:sbw$}                                         0.25  net-regexp_template-regexp_sch_sh
+#{issahcciosbint:sbnlvl[ud][pn]\[\d\]$}                         0.30  net-regexp_template-regexp_sch_sh
+#{issahcciosbint:sbplvl[n]*\[\d\]$}                             0.001 net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:wren}                                         0.30  net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:waenn}                                        0.001 net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:wrclk}                                        0.35  net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:nvss}                                         0.40  net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:kick}                                         0.40  net-regexp_template-regexp_sch_sh
+
+{issahccciocmr2cmw8:sapch[n]*$}                 0.25    net-regexp_template-regexp_sch_em
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrcolsel\[\d\]$}           0.15  net-regexp_template-regexp_sch_em
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrcolselnn\[\d\]$}         0.15  net-regexp_template-regexp_sch_em
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrdata[n]*$}               0.15  net-regexp_template-regexp_sch_em
+{issahcciowrysel(x4|x2x2be)(nbl|lya):wrbl[n]*\[\d\]$}           0.15  net-regexp_template-regexp_sch_em
+#{issahcciosbcell:sbw$}                                         0.10  net-regexp_template-regexp_sch_em
+#{issahcciosbint:sbnlvl[ud][pn]\[\d\]$}                         0.10  net-regexp_template-regexp_sch_em
+#{issahcciosbint:sbplvl[n]*\[\d\]$}                             0.001 net-regexp_template-regexp_sch_em
+{issahcciowrbfnbl:waenn}                                        0.001 net-regexp_template-regexp_sch_sh
+{issahcciowrbfnbl:wren}                                         0.15  net-regexp_template-regexp_sch_em
+{issahcciowrbfnbl:wrclk}                                        0.15  net-regexp_template-regexp_sch_em
+{issahcciowrbfnbl:nvss}                                         0.15  net-regexp_template-regexp_sch_em
+{issahcciowrbfnbl:kick}                                         0.15  net-regexp_template-regexp_sch_em
+
+#### Timer ##############
+{_sidetimer:wrcolsel#\[\d\]}                                    0.15  net-regexp_template-regexp_sch_sh
+{_sidetimer:rdysel#\[\d\]}                                      0.15  net-regexp_template-regexp_sch_sh
+{_sidetimer:wle\[\d\]}                                          0.15  net-regexp_template-regexp_sch_sh
+{_sidetimer:wlered\[\d\]}                                       0.15  net-regexp_template-regexp_sch_sh
+{_sidetimer:clk(wr|rd)ysel$}                                    0.35  net-regexp_template-regexp_sch_sh
+{_centimer:sae$}                                                0.35  net-regexp_template-regexp_sch_sh
+{_centimer:sapch$}                                              0.35  net-regexp_template-regexp_sch_sh
+{_centimer:clkwl$}                                              0.50  net-regexp_template-regexp_sch_sh
+{_subbnk:(rd|wr)wl$}                                            0.35  net-regexp_template-regexp_sch_sh
+{_centimer:(wr|rd)wlclkmx$}                                     0.35  net-regexp_template-regexp_sch_sh
+
+
+{_sidetimer:wrcolsel#\[\d\]}                                    0.10  net-regexp_template-regexp_sch_em
+{_sidetimer:rdysel#\[\d\]}                                      0.10  net-regexp_template-regexp_sch_em
+{_sidetimer:wle\[\d\]}                                          0.10  net-regexp_template-regexp_sch_em
+{_sidetimer:wlered\[\d\]}                                       0.10  net-regexp_template-regexp_sch_em
+{_sidetimer:clk(wr|rd)ysel}                                     0.20  net-regexp_template-regexp_sch_em
+{_centimer:sae$}                                                0.20  net-regexp_template-regexp_sch_em
+{_centimer:sapch$}                                              0.20  net-regexp_template-regexp_sch_em
+{_centimer:clkwl$}                                              0.20  net-regexp_template-regexp_sch_em
+{_subbnk:(rd|wr)wl$}                                            0.20  net-regexp_template-regexp_sch_em
+{_centimer:(wr|rd)wlclkmx$}                                     0.20  net-regexp_template-regexp_sch_em
+#### GIO ##############
+{_gio:clkwr2h2l(nn)?_[ud][pn]}                                  0.35  net-regexp_template-regexp_sch_sh
+{_gio:clkrdsync_[ud][pn]}                                       0.35  net-regexp_template-regexp_sch_sh
+{_gio:rdclk_[ud][pn]}                                           0.35  net-regexp_template-regexp_sch_sh
+{_gio:selbnk\d(nn)?_[ud][pn]}                                   0.20  net-regexp_template-regexp_sch_sh
+{_gio:selchunk\d_[ud][pn]}                                      0.20  net-regexp_template-regexp_sch_sh
+
+
+{_gio:clkwr2h2l(nn)?_[ud][pn]}                                  0.20  net-regexp_template-regexp_sch_em
+{_gio:clkrdsync_[ud][pn]}                                       0.20  net-regexp_template-regexp_sch_em
+{_gio:rdclk_[ud][pn]}                                           0.20  net-regexp_template-regexp_sch_em
+{_gio:selbnk\d(nn)?_[ud][pn]}                                   0.20  net-regexp_template-regexp_sch_em
+{_gio:selchunk\d_[ud][pn]}                                      0.20  net-regexp_template-regexp_sch_em
+
+#### Tracker ##############
+
+{issahcctrk256slc:trkbl$}                                       0.40  net-regexp_template-regexp_sch_sh
+{issahcctrk256slc:trkwl$}                                       0.40  net-regexp_template-regexp_sch_sh
+
+{issahcctrk\d+slc:trkbl$}                                       0.25  net-regexp_template-regexp_sch_em
+{issahcctrk\d+slc:trkwl$}                                       0.25  net-regexp_template-regexp_sch_em
+#DC
+{sramvcc_noconn} 0.001 net-regexp_sch_em_sh
+{sramvcc_noconn}                                                0.001 regexp_sch_em_sh
+{issahcc(io)?lyal(1|2)mux:(n(n|p)0(nn)?|lyal(0|1|2)bl(nn)?)}    0.001 net-regexp_template-regexp_sch_em_sh
+{/c6save}             0.001 regexp_sch_em_sh
+{/lyaennn}                                                      0.001 regexp_sch_em_sh
+{gio/lyaselgio}                                                 0.001 regexp_sch_em_sh

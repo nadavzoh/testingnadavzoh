@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "LOTUS - ip78d6hcf2sr4096x135m4i2k4w8r2lya",
+            "type": "bashdb",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/bin/lotus",
+            "args": ["-fub", "ip78d6hcf2sr4096x135m4i2k4w8r2lya"],
+            "env": {
+                "WORK_AREA_ROOT_DIR": "${workspaceFolder}/tests/ip78d6hcf2sr4096x135m4i2k4w8r2lya",
+            },
+        },
+        {
+            "name": "LOTUS - dcchunkrotd",
+            "type": "bashdb",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/bin/lotus",
+            "args": ["-fub", "dcchunkrotd"],
+            "env": {
+                "WORK_AREA_ROOT_DIR": "${workspaceFolder}/tests/dcchunkrotd",
+            },
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+{some_template:some_net} 0.123 template-regular_net-regular
+{dcchunkrotd:chunkrotoutintnobcstm403l_0__0__data[7]} 0.15 template-regular_net-regular
+{.*_0__0__data} 0.15 net-regexp_sch_em_sh
+{.*:bonus} 0.5 template-regexp_net-regexp_sch_em
+{.*:.*} 0.10 template-regexp_net-regexp_sch_em
+{dcu.*:n\d+} 0.5 template-regexp_net-regexp_sch_em
+# 12345
+####### s
+{.*} 0.15 net-regexp_sch_em_sh
+# {k:bbb} 0.15 template-regular_net-regular_sch_em_sh
+# uncomment me to see an invalid line
+{dcchunkrotd_bonus_container/bonus_188/nb} 0.5
+b
